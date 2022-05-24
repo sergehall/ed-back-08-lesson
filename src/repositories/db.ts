@@ -17,7 +17,7 @@ const AnswerScheme = new mongoose.Schema<AnswerDBType>({
     createdAt: { type: Date, required: true  }
 });
 const GamePairScheme = new mongoose.Schema<GamePairDBType>({
-    player1Id: { type: ObjectId, default: null },
+    player1Id: { type: ObjectId },
     player2Id: { type: ObjectId, default: null },
     questionsIds: [ObjectId],
     player1Answers: [AnswerScheme],

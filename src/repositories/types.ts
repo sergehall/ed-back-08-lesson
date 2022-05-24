@@ -5,7 +5,7 @@ export type UserDBType = WithId<{
 }>
 
 export type GamePairDBType = WithId<{
-    player1Id: ObjectId | null
+    player1Id: ObjectId
     player2Id: ObjectId | null
     questionsIds: ObjectId[]
     player1Answers: AnswerDBType[]
