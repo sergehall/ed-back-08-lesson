@@ -15,10 +15,9 @@ describe("GameSmartRepository", () => {
         let user4Id = new ObjectId()
         const repo = new GameSmartRepository()
 
+        let mongoServer: MongoMemoryServer;
+
         beforeAll(async () => {
-            const mongoServer = await MongoMemoryServer.create()
-            const uri = mongoServer.getUri()
-            await mongoose.connect(uri);
             await GamePairModel.insertMany([
                 {
                     _id: new ObjectId(),
@@ -48,6 +47,12 @@ describe("GameSmartRepository", () => {
                     player2Id: user4Id
                 }
             ])
+        })
+
+        afterAll(async ()=>{
+            await mongoose.connection.db.dropDatabase();
+            await mongoose.disconnect()
+            await mongoServer.stop()
         })
 
 
@@ -76,8 +81,10 @@ describe("GameSmartRepository", () => {
         let user5Id = new ObjectId()
         const repo = new GameSmartRepository()
 
+        let mongoServer: MongoMemoryServer;
+
         beforeAll(async () => {
-            const mongoServer = await MongoMemoryServer.create()
+            mongoServer = await MongoMemoryServer.create()
             const uri = mongoServer.getUri()
             await mongoose.connect(uri);
             await GamePairModel.insertMany([
@@ -109,6 +116,12 @@ describe("GameSmartRepository", () => {
                     player2Id: user4Id
                 }
             ])
+        })
+
+        afterAll(async ()=>{
+            await mongoose.connection.db.dropDatabase();
+            await mongoose.disconnect()
+            await mongoServer.stop()
         })
 
         it("should return active pair", async () => {

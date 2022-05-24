@@ -2,11 +2,16 @@ import {ObjectId} from 'mongodb'
 import {GamePairModel} from './db'
 
 export class GameSmartRepository {
-    async findNotClosedPairForUser(userId: ObjectId): Promise<{ playersCount: number } | null> {
+    private async findNotClosedPair(userId: ObjectId) {
         const activePair = await GamePairModel.findOne({
             $or: [{player1Id: userId}, {player2Id: userId}],
             closed: false
         })
+        return activePair
+    }
+
+    async findNotClosedPairForUser(userId: ObjectId): Promise<{ playersCount: number } | null> {
+        const activePair = await this.findNotClosedPair(userId)
 
         let playersCount = 0
 
@@ -22,10 +27,7 @@ export class GameSmartRepository {
     }
     async registrate(userId: ObjectId): Promise<{ playersCount: number, pairId: ObjectId } | null> {
 
-        const activePair = await GamePairModel.findOne({
-            $or: [{player1Id: userId}, {player2Id: userId}],
-            closed: false
-        })
+        const activePair = await this.findNotClosedPair(userId)
 
         if (activePair) {
             return null

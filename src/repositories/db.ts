@@ -30,6 +30,7 @@ export const UserModel = mongoose.model('User', UserScheme);
 export const GamePairModel = mongoose.model('GamePair', GamePairScheme);
 
 
+
 export async function runDb() {
     try {
         // Connect the client to the server
