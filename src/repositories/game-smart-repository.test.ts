@@ -5,7 +5,7 @@ import {MongoMemoryServer} from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 import {settings} from '../settings'
 
-jest.setTimeout(100000)
+jest.setTimeout(200000)
 
 describe("GameSmartRepository", () => {
 
@@ -20,6 +20,10 @@ describe("GameSmartRepository", () => {
         let mongoServer: MongoMemoryServer;
 
         beforeAll(async () => {
+            mongoServer = await MongoMemoryServer.create()
+            const uri = mongoServer.getUri()
+            await mongoose.connect(uri);
+
             await GamePairModel.insertMany([
                 {
                     _id: new ObjectId(),
@@ -192,10 +196,9 @@ describe("GameSmartRepository", () => {
 
         it("if no qestions should return error", async () => {
             repo.questionsCount = 6
-            expect(async () => {
-
+            await expect(async () => {
                 await repo.registrate(user6Id);
-            }).toThrow();
+            }).rejects.toThrow();
         })
 
 
