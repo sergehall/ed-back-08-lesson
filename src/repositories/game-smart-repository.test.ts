@@ -55,7 +55,7 @@ describe("GameSmartRepository", () => {
             ])
         })
 
-        afterAll(async ()=>{
+        afterAll(async () => {
             await mongoose.connection.db.dropDatabase();
             await mongoose.disconnect()
             await mongoServer.stop()
@@ -127,7 +127,7 @@ describe("GameSmartRepository", () => {
                     _id: new ObjectId(),
                     title: "1+1",
                     answer: "2"
-            },
+                },
                 {
                     _id: new ObjectId(),
                     title: "1+2",
@@ -151,7 +151,7 @@ describe("GameSmartRepository", () => {
             ])
         })
 
-        afterAll(async ()=>{
+        afterAll(async () => {
             await mongoose.connection.db.dropDatabase();
             await mongoose.disconnect()
             await mongoServer.stop()
@@ -159,7 +159,7 @@ describe("GameSmartRepository", () => {
 
         it("should return active pair", async () => {
             const result = await repo.registrate(user1Id)
-            const result2= await repo.registrate(user2Id)
+            const result2 = await repo.registrate(user2Id)
             expect(result).toBe(null)
             expect(result2).toBe(null)
 
@@ -214,16 +214,28 @@ describe("GameSmartRepository", () => {
         const repo = new GameSmartRepository()
 
         let mongoServer: MongoMemoryServer;
+        const questionArray = new Array(5).fill(null).map((ele, index) => ({
+            _id: new ObjectId(),
+            title: index.toString(),
+            answer: index.toString()
+        }))
+
+        const pairArray = new Array(5).fill(null).map(() => new ObjectId())
 
         beforeAll(async () => {
+
+
+
+
             mongoServer = await MongoMemoryServer.create()
             const uri = mongoServer.getUri()
             await mongoose.connect(uri);
+
             await GamePairModel.insertMany([
                 {
-                    _id: new ObjectId(),
+                    _id: pairArray[0],
                     closed: false,
-                    questionsIds: [],
+                    questionsIds: [questionArray[0]._id,questionArray[1]._id,questionArray[2]._id],
                     player1Answers: [],
                     player2Answers: [],
                     player1Id: user1Id,
@@ -248,83 +260,34 @@ describe("GameSmartRepository", () => {
                     player2Id: user4Id
                 }
             ])
-            await QuestionModel.insertMany([
-                {
-                    _id: new ObjectId(),
-                    title: "1+1",
-                    answer: "2"
-                },
-                {
-                    _id: new ObjectId(),
-                    title: "1+2",
-                    answer: "3"
-                },
-                {
-                    _id: new ObjectId(),
-                    title: "5*5",
-                    answer: "25"
-                },
-                {
-                    _id: new ObjectId(),
-                    title: "6*6",
-                    answer: "36"
-                },
-                {
-                    _id: new ObjectId(),
-                    title: "7*7",
-                    answer: "49"
-                }
-            ])
+            await QuestionModel.insertMany(questionArray)
         })
 
-        afterAll(async ()=>{
+        afterAll(async () => {
             await mongoose.connection.db.dropDatabase();
             await mongoose.disconnect()
             await mongoServer.stop()
         })
 
         it("should return active pair", async () => {
-            const result = await repo.registrate(user1Id)
-            const result2= await repo.registrate(user2Id)
-            expect(result).toBe(null)
-            expect(result2).toBe(null)
-
-            const result3 = await repo.registrate(user3Id)
-            expect(result3).toBe(null)
-
-        })
-        it("should return ready to start pair", async () => {
-            const result = await repo.registrate(user4Id)
-            expect(result!.playersCount).toBe(2)
+            // const result = await repo.registrate(user1Id)
+            // const result2= await repo.registrate(user2Id)
+            // expect(result).toBe(null)
+            // expect(result2).toBe(null)
+            //
+            // const result3 = await repo.registrate(user3Id)
+            // expect(result3).toBe(null)
 
 
-            const pair = await GamePairModel.findOne({
-                _id: result!.pairId
-            })
-            expect(pair!.questionsIds.length).toBe(3)
-            expect(pair!.player2Id).toEqual(user4Id)
-            expect(pair!.player1Id).toEqual(user3Id)
-        })
 
-        it("should return new pair", async () => {
-            const result = await repo.registrate(user5Id)
-            expect(result!.playersCount).toBe(1)
+            const questionForUser1 = await repo.getQuestion(user1Id)
+            const questionForUser2 = await repo.getQuestion(user2Id)
 
-            const pair = await GamePairModel.findOne({
-                _id: result!.pairId
-            })
-
-            expect(pair!.player2Id).toBeNull()
-            expect(pair!.player1Id).toEqual(user5Id)
+            expect(questionForUser1?._id).toEqual(questionArray[0]._id)
+            expect(questionForUser2?._id).toEqual(questionArray[0]._id)
 
 
-        })
 
-        it("if no qestions should return error", async () => {
-            repo.questionsCount = 6
-            await expect(async () => {
-                await repo.registrate(user6Id);
-            }).rejects.toThrow();
         })
 
 

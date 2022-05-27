@@ -2,8 +2,7 @@ import 'dotenv/config'
 import express from 'express'
 import bodyParser from 'body-parser'
 import {runDb} from './repositories/db'
-import {authRouter} from './routes/auth/auth-router'
-import {usersRouter} from './routes/users/users-router'
+
 import session from 'express-session'
 import cookieParser from 'cookie-parser'
 
@@ -27,10 +26,9 @@ const jsonBodyMiddleware = bodyParser.json()
 app.use(jsonBodyMiddleware)
 app.use(cookieParser())
 
-const port = process.env.PORT || 5000
+const port = process.env.PORT || 8000
 
-app.use('/users', usersRouter)
-app.use('/auth', authRouter)
+
 app.use('/login', (req, res) => {
     if (true) { // login true
         const refreshToken = 'refreshTokenValue.blsbsl.hash'
