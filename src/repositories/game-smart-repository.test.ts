@@ -1,9 +1,11 @@
 import {GameSmartRepository} from './game-smart-repository'
 import {ObjectId} from 'mongodb'
-import {GamePairModel} from './db'
+import {GamePairModel, QuestionModel} from './db'
 import {MongoMemoryServer} from 'mongodb-memory-server'
 import mongoose from 'mongoose'
 import {settings} from '../settings'
+
+jest.setTimeout(100000)
 
 describe("GameSmartRepository", () => {
 
@@ -73,12 +75,12 @@ describe("GameSmartRepository", () => {
     })
 
     describe("registrate", () => {
-
         let user1Id = new ObjectId()
         let user2Id = new ObjectId()
         let user3Id = new ObjectId()
         let user4Id = new ObjectId()
         let user5Id = new ObjectId()
+        let user6Id = new ObjectId()
         const repo = new GameSmartRepository()
 
         let mongoServer: MongoMemoryServer;
@@ -116,6 +118,33 @@ describe("GameSmartRepository", () => {
                     player2Id: user4Id
                 }
             ])
+            await QuestionModel.insertMany([
+                {
+                    _id: new ObjectId(),
+                    title: "1+1",
+                    answer: "2"
+            },
+                {
+                    _id: new ObjectId(),
+                    title: "1+2",
+                    answer: "3"
+                },
+                {
+                    _id: new ObjectId(),
+                    title: "5*5",
+                    answer: "25"
+                },
+                {
+                    _id: new ObjectId(),
+                    title: "6*6",
+                    answer: "36"
+                },
+                {
+                    _id: new ObjectId(),
+                    title: "7*7",
+                    answer: "49"
+                }
+            ])
         })
 
         afterAll(async ()=>{
@@ -134,7 +163,7 @@ describe("GameSmartRepository", () => {
             expect(result3).toBe(null)
 
         })
-        it("should return old pair", async () => {
+        it("should return ready to start pair", async () => {
             const result = await repo.registrate(user4Id)
             expect(result!.playersCount).toBe(2)
 
@@ -142,7 +171,7 @@ describe("GameSmartRepository", () => {
             const pair = await GamePairModel.findOne({
                 _id: result!.pairId
             })
-
+            expect(pair!.questionsIds.length).toBe(3)
             expect(pair!.player2Id).toEqual(user4Id)
             expect(pair!.player1Id).toEqual(user3Id)
         })
@@ -160,6 +189,15 @@ describe("GameSmartRepository", () => {
 
 
         })
+
+        it("if no qestions should return error", async () => {
+            repo.questionsCount = 6
+            expect(async () => {
+
+                await repo.registrate(user6Id);
+            }).toThrow();
+        })
+
 
     })
 })
