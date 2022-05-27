@@ -1,5 +1,6 @@
 import {ObjectId} from 'mongodb'
 import {GamePairModel, QuestionModel} from './db'
+import {QuestionDBType} from './types'
 
 export class GameSmartRepository {
     constructor(public questionsCount: number=3){}
@@ -63,6 +64,9 @@ export class GameSmartRepository {
         await newPair.save()
 
         return {playersCount: 1, pairId: newPair._id}
+    }
+    async getQuestion(userId: ObjectId): Promise<QuestionDBType | null> {
+        return null
     }
 }
 
