@@ -1,7 +1,8 @@
 import {ObjectId} from 'mongodb'
-import {GamePairModel} from './db'
+import {GamePairModel, QuestionModel} from './db'
 
 export class GameSmartRepository {
+    constructor(public questionsCount: number=3){}
     private async findNotClosedPair(userId: ObjectId) {
         const activePair = await GamePairModel.findOne({
             $or: [{player1Id: userId}, {player2Id: userId}],
@@ -28,7 +29,7 @@ export class GameSmartRepository {
     async registrate(userId: ObjectId): Promise<{ playersCount: number, pairId: ObjectId } | null> {
 
         const activePair = await this.findNotClosedPair(userId)
-
+            //user already registered and wait 2nd player
         if (activePair) {
             return null
         }
@@ -39,11 +40,13 @@ export class GameSmartRepository {
         })
 
         if (unfilledPair) {
-
             unfilledPair.player2Id = userId
-
+            const totalQuestions = await QuestionModel.count({})
+            if(totalQuestions<this.questionsCount) throw new Error("No questions in DB")
+            const randomSkip = Math.floor(Math.random() * totalQuestions-(this.questionsCount - 1))
+            const questions = await QuestionModel.find({}).limit(this.questionsCount).skip(randomSkip)
+            unfilledPair.questionsIds = questions.map(q=>q._id)
             await unfilledPair.save()
-
             return {playersCount: 2, pairId: unfilledPair._id}
         }
 
