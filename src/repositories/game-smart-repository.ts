@@ -66,7 +66,23 @@ export class GameSmartRepository {
         return {playersCount: 1, pairId: newPair._id}
     }
     async getQuestion(userId: ObjectId): Promise<QuestionDBType | null> {
-        return null
+        const session= await this.findNotClosedPair(userId)
+        let currentQuestionIndex=0
+
+        if(!session){
+            return null
+        }
+
+        if(session.player1Id===userId){
+            currentQuestionIndex=session.player1Answers.length
+        }
+        if(session.player2Id===userId){
+            currentQuestionIndex=session.player2Answers.length
+        }
+
+        const QuestionId=session.questionsIds[currentQuestionIndex]
+
+        return QuestionModel.findById(QuestionId)
     }
 }
 
